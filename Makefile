@@ -4,7 +4,7 @@ build:
 	go build -o anki .
 
 dev:
-	go run .
+	DEV_MODE=1 go run .
 
 test:
 	go test ./...
