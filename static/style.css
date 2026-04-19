@@ -242,6 +242,7 @@ td.truncate { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white
   margin-top: 1.5rem;
 }
 .panel h2 { font-size: 1rem; margin-bottom: 1rem; font-weight: 600; }
+details.panel summary + .form-group { margin-top: 1rem; }
 
 .new-deck-panel summary {
   font-size: 0.9rem;

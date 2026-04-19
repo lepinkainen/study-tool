@@ -14,6 +14,19 @@
 </header>
 
 <div class="container">
+  <details class="panel">
+    <summary>Deck Settings</summary>
+    <div class="form-group">
+      <label for="deck-name">Name</label>
+      <input type="text" id="deck-name" placeholder="Deck name">
+    </div>
+    <div class="form-group">
+      <label for="deck-desc">Description</label>
+      <input type="text" id="deck-desc" placeholder="Optional description">
+    </div>
+    <button class="btn btn-primary" id="save-deck-btn">Save</button>
+  </details>
+
   <div class="panel">
     <h2>Add Card</h2>
     <div class="form-group">
@@ -24,6 +37,7 @@
     </div>
     <button class="btn btn-primary" id="add-btn">Add Card</button>
   </div>
+
 
   <div id="card-table-wrap" style="margin-top:1.5rem">
     <table id="card-table" style="display:none">
@@ -77,12 +91,23 @@ async function api(method, path, body) {
 
 async function loadDeck() {
   try {
-    const res = await fetch(`/api/decks`);
-    const decks = await res.json();
-    const d = decks.find(x => String(x.id) === deckID);
-    if (d) $('deck-title').textContent = d.name;
+    const d = await api('GET', `/api/decks/${deckID}`);
+    $('deck-title').textContent = d.name;
+    $('deck-name').value = d.name;
+    $('deck-desc').value = d.description || '';
   } catch(_) {}
 }
+
+$('save-deck-btn').addEventListener('click', async () => {
+  const name = $('deck-name').value.trim();
+  const description = $('deck-desc').value.trim();
+  if (!name) { toast('Name is required'); return; }
+  try {
+    const d = await api('PATCH', `/api/decks/${deckID}`, { name, description });
+    $('deck-title').textContent = d.name;
+    toast('Deck saved');
+  } catch(e) { toast(e.message); }
+});
 
 async function loadCards() {
   try {

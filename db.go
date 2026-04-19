@@ -137,6 +137,17 @@ func getDeck(db *sql.DB, id int64) (Deck, error) {
 	return d, err
 }
 
+func updateDeck(db *sql.DB, id int64, name, description string) (Deck, error) {
+	res, err := db.Exec(`UPDATE decks SET name = ?, description = ? WHERE id = ?`, name, description, id)
+	if err != nil {
+		return Deck{}, err
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return Deck{}, sql.ErrNoRows
+	}
+	return getDeck(db, id)
+}
+
 func deleteDeck(db *sql.DB, id int64) error {
 	_, err := db.Exec(`DELETE FROM decks WHERE id = ?`, id)
 	return err

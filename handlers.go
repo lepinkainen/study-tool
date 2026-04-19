@@ -57,6 +57,54 @@ func handleCreateDeck(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+func handleGetDeck(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := pathID(r, "id")
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "invalid id")
+			return
+		}
+		deck, err := getDeck(db, id)
+		if err == sql.ErrNoRows {
+			writeError(w, http.StatusNotFound, "deck not found")
+			return
+		}
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		writeJSON(w, http.StatusOK, deck)
+	}
+}
+
+func handleUpdateDeck(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := pathID(r, "id")
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "invalid id")
+			return
+		}
+		var body struct {
+			Name        string `json:"name"`
+			Description string `json:"description"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Name == "" {
+			writeError(w, http.StatusBadRequest, "name is required")
+			return
+		}
+		deck, err := updateDeck(db, id, body.Name, body.Description)
+		if err == sql.ErrNoRows {
+			writeError(w, http.StatusNotFound, "deck not found")
+			return
+		}
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		writeJSON(w, http.StatusOK, deck)
+	}
+}
+
 func handleDeleteDeck(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := pathID(r, "id")

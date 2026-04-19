@@ -40,6 +40,8 @@ func main() {
 	// API routes
 	mux.HandleFunc("GET /api/decks", handleListDecks(db))
 	mux.HandleFunc("POST /api/decks", handleCreateDeck(db))
+	mux.HandleFunc("GET /api/decks/{id}", handleGetDeck(db))
+	mux.HandleFunc("PATCH /api/decks/{id}", handleUpdateDeck(db))
 	mux.HandleFunc("DELETE /api/decks/{id}", handleDeleteDeck(db))
 	mux.HandleFunc("GET /api/decks/{id}/cards", handleListCards(db))
 	mux.HandleFunc("POST /api/decks/{id}/cards", handleCreateCard(db))
@@ -49,11 +51,18 @@ func main() {
 	mux.HandleFunc("GET /api/decks/{id}/stats", handleDeckStats(db))
 
 	// Static files
-	sub, err := fs.Sub(staticFiles, "static")
-	if err != nil {
-		log.Fatalf("static fs: %v", err)
+	var staticHandler http.Handler
+	if os.Getenv("DEV_MODE") != "" {
+		log.Printf("DEV_MODE: serving static files from ./static")
+		staticHandler = http.FileServer(http.Dir("./static"))
+	} else {
+		sub, err := fs.Sub(staticFiles, "static")
+		if err != nil {
+			log.Fatalf("static fs: %v", err)
+		}
+		staticHandler = http.FileServer(http.FS(sub))
 	}
-	mux.Handle("/", http.FileServer(http.FS(sub)))
+	mux.Handle("/", staticHandler)
 
 	log.Printf("Listening on :%s", port)
 	if err := http.ListenAndServe(":"+port, mux); err != nil {
