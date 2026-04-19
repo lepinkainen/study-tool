@@ -10,7 +10,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o anki .
 FROM alpine:3.19
 
 RUN apk add --no-cache ca-certificates tzdata
-RUN mkdir -p /data && chown nobody:nobody /data
+RUN mkdir -p /data
 WORKDIR /app
 COPY --from=builder /build/anki .
 
@@ -19,5 +19,4 @@ VOLUME ["/data"]
 ENV DB_PATH=/data/anki.db
 ENV PORT=8080
 
-USER nobody
 ENTRYPOINT ["./anki"]
