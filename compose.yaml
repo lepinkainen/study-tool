@@ -1,6 +1,6 @@
 services:
   anki:
-    build: .
+    image: ghcr.io/lepinkainen/study-tool:latest
     ports:
       - "8080:8080"
     volumes:
